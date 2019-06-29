@@ -31,6 +31,20 @@
 			<artifactId>log4j-core</artifactId>
 			<version>2.11.0</version>
 		</dependency>
+
+		<!-- JAX-RS for REST -->
+		<dependency>
+			<groupId>javax.ws.rs</groupId>
+			<artifactId>javax.ws.rs-api</artifactId>
+			<version>2.0</version>
+		</dependency>
+		
+		<!-- Jersey (JAX-RS implementing service) -->
+		<dependency>
+			<groupId>com.eclipsesource.jaxrs</groupId>
+			<artifactId>jersey-all</artifactId>
+			<version>2.8</version>
+		</dependency>
 	</dependencies>
 
 	<build>

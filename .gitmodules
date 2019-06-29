@@ -1,0 +1,3 @@
+[submodule "picavi_json_rpc_server"]
+	path = picavi_json_rpc_server
+	url = https://github.com/tfassbender/picavi_json_rpc_server.git
