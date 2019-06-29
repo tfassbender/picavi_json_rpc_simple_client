@@ -11,6 +11,7 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
@@ -23,7 +24,9 @@ public class SimpleRpcController implements Initializable {
 	private PasswordField passwordFieldPassword;
 	@FXML
 	private Button buttonLoginLogout;
-	
+
+    @FXML
+    private CheckBox checkboxAsync;
 	@FXML
 	private Button buttonSendRequest;
 	@FXML
@@ -67,6 +70,9 @@ public class SimpleRpcController implements Initializable {
 		buttonSendRequest.setOnAction(e -> sendRequest());
 	}
 	
+	/**
+	 * Login or logout the user by sending the request to the server
+	 */
 	private void loginOrLogout() {
 		//send the request via the client
 		boolean loginSuccessful = true;
@@ -81,6 +87,7 @@ public class SimpleRpcController implements Initializable {
 			}
 		}
 		catch (IllegalStateException ise) {
+			//handle exceptions (that occur when the request fails for any reason)
 			loginSuccessful = false;
 			String errorType;
 			if (loggedIn.get()) {
@@ -94,18 +101,23 @@ public class SimpleRpcController implements Initializable {
 					String.format("The %s was not successful for unknown reasons", errorType));
 		}
 		
-		//change the logged in state 
+		//change the logged in state (if the login/logout was successful)
 		if (loginSuccessful) {
 			loggedIn.set(!loggedIn.get());
 		}
 	}
 	
+	/**
+	 * Request the picklist from the server
+	 */
 	private void sendRequest() {
 		String ident = textFieldIdentification.getText();
+		boolean async = checkboxAsync.isSelected();
 		try {
-			client.getPickList(ident);
+			client.getPickList(ident, async);
 		}
 		catch (IllegalStateException e) {
+			//handle exceptions (that occur when the request fails for any reason)
 			DialogUtils.showErrorDialog("A problem occured", "Picklist couldn't be received",
 					"The picklist couldn't be received from the server for unknown reasons");
 		}
