@@ -4,7 +4,19 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.picavi.json_rpc</groupId>
 	<artifactId>PicaviJsonRpc_simpleClient</artifactId>
+	<!-- <packaging>pom</packaging> -->
 	<version>0.0.1-SNAPSHOT</version>
+
+	<!-- <modules> <module>picavi_json_rpc_server</module> </modules> -->
+
+	<repositories>
+		<repository>
+			<id>snapshot-repository.java.net</id>
+			<name>Java.net Snapshot Repository for Maven</name>
+			<url>https://maven.java.net/content/repositories/snapshots/</url>
+			<layout>default</layout>
+		</repository>
+	</repositories>
 
 	<dependencies>
 		<!-- Unit test framework -->
@@ -32,22 +44,30 @@
 			<version>2.11.0</version>
 		</dependency>
 
+
 		<!-- JAX-RS for REST -->
 		<dependency>
 			<groupId>javax.ws.rs</groupId>
 			<artifactId>javax.ws.rs-api</artifactId>
 			<version>2.0</version>
 		</dependency>
-		
+
 		<!-- Jersey (JAX-RS implementing service) -->
+		<!-- <dependency> <groupId>com.eclipsesource.jaxrs</groupId> <artifactId>jersey-all</artifactId> 
+			<version>2.8</version> </dependency> <dependency> <groupId>org.glassfish.jersey.media</groupId> 
+			<artifactId>jersey-media-json-jackson</artifactId> <version>2.10.1</version> 
+			</dependency> <dependency> <groupId>org.glassfish.jersey.media</groupId> 
+			<artifactId>jersey-media-json-jackson</artifactId> <version>2.10.1</version> 
+			</dependency> -->
 		<dependency>
-			<groupId>com.eclipsesource.jaxrs</groupId>
-			<artifactId>jersey-all</artifactId>
-			<version>2.8</version>
+			<groupId>org.glassfish.jersey.containers</groupId>
+			<artifactId>jersey-container-jdk-http</artifactId>
+			<version>2.10.1</version>
 		</dependency>
 	</dependencies>
 
 	<build>
+		<sourceDirectory>picavi_json_rpc_server/src/main/java</sourceDirectory>
 		<plugins>
 			<!-- Compiler plugin that tells the compiler to use java-1.8 -->
 			<plugin>

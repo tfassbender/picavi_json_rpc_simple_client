@@ -33,7 +33,7 @@ public class SimpleRpcClient {
 	 * @throws IllegalStateException
 	 *         An {@link IllegalStateException} is thrown if the login was not successful
 	 */
-	public void login(String username, String password) throws IllegalStateException {
+	public JsonRpcResponse login(String username, String password) throws IllegalStateException {
 		LOGGER.info("login: user: {}, password: <not shown here>", username);
 		//create a request for the login
 		JsonRpcRequest request = createLoginRequest(username, password);
@@ -51,6 +51,12 @@ public class SimpleRpcClient {
 		if (responseCode != Response.Status.OK.getStatusCode()) {
 			throw new IllegalStateException("HTTP error code: " + responseCode);
 		}
+		else if (response.hasEntity()) {
+			return response.readEntity(JsonRpcResponse.class);
+		}
+		else {
+			throw new IllegalArgumentException("The response was expected to contain data, but it's empty");
+		}
 	}
 	
 	private JsonRpcRequest createLoginRequest(String username, String password) {
@@ -67,7 +73,7 @@ public class SimpleRpcClient {
 	 * @throws IllegalStateException
 	 *         An {@link IllegalStateException} is thrown when the logout was not successful
 	 */
-	public void logout(String username) throws IllegalStateException {
+	public JsonRpcResponse logout(String username) throws IllegalStateException {
 		LOGGER.info("logout: user: {}", username);
 		//create a request for the logout
 		JsonRpcRequest request = createLogoutRequest(username);
@@ -84,6 +90,12 @@ public class SimpleRpcClient {
 		//check whether the response was OK or an error code
 		if (responseCode != Response.Status.OK.getStatusCode()) {
 			throw new IllegalStateException("HTTP error code: " + responseCode);
+		}
+		else if (response.hasEntity()) {
+			return response.readEntity(JsonRpcResponse.class);
+		}
+		else {
+			throw new IllegalArgumentException("The response was expected to contain data, but it's empty");
 		}
 	}
 	

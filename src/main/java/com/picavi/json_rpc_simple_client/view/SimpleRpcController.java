@@ -3,6 +3,7 @@ package com.picavi.json_rpc_simple_client.view;
 import java.net.URL;
 import java.util.ResourceBundle;
 
+import com.picavi.json_rpc_server.model.JsonRpcResponse;
 import com.picavi.json_rpc_simple_client.client.SimpleRpcClient;
 
 import javafx.beans.binding.Bindings;
@@ -21,12 +22,14 @@ public class SimpleRpcController implements Initializable {
 	@FXML
 	private TextField textFieldUserName;
 	@FXML
+	private TextField textFieldSessionId;
+	@FXML
 	private PasswordField passwordFieldPassword;
 	@FXML
 	private Button buttonLoginLogout;
-
-    @FXML
-    private CheckBox checkboxAsync;
+	
+	@FXML
+	private CheckBox checkboxAsync;
 	@FXML
 	private Button buttonSendRequest;
 	@FXML
@@ -80,10 +83,12 @@ public class SimpleRpcController implements Initializable {
 		try {
 			if (loggedIn.get()) {
 				String passwd = passwordFieldPassword.getText();
-				client.login(username, passwd);
+				JsonRpcResponse loginResponse = client.login(username, passwd);
+				processLogin(loginResponse);
 			}
 			else {
-				client.logout(username);
+				JsonRpcResponse logoutResponse = client.logout(username);
+				processLogout(logoutResponse);
 			}
 		}
 		catch (IllegalStateException ise) {
@@ -105,6 +110,19 @@ public class SimpleRpcController implements Initializable {
 		if (loginSuccessful) {
 			loggedIn.set(!loggedIn.get());
 		}
+	}
+	
+	/**
+	 * Process the login response and throw an {@link IllegalStateException} if the response is not OK.
+	 */
+	private void processLogin(JsonRpcResponse loginResponse) throws IllegalStateException {
+		//TODO
+	}
+	/**
+	 * Process the logout response and throw an {@link IllegalStateException} if the response is not OK.
+	 */
+	private void processLogout(JsonRpcResponse logoutResponse) throws IllegalStateException {
+		//TODO
 	}
 	
 	/**
