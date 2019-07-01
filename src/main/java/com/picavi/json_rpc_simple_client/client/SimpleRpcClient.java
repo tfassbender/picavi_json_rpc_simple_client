@@ -21,6 +21,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.picavi.json_rpc_server.model.Credentials;
 import com.picavi.json_rpc_server.model.JsonRpcError;
+import com.picavi.json_rpc_server.model.JsonRpcErrorResponse;
 import com.picavi.json_rpc_server.model.JsonRpcLoginAnswer;
 import com.picavi.json_rpc_server.model.JsonRpcRequest;
 import com.picavi.json_rpc_server.model.JsonRpcResponse;
@@ -89,16 +90,10 @@ public class SimpleRpcClient {
 			throw new IllegalStateException("HTTP error code: " + responseCode);
 		}
 		else if (response.hasEntity()) {
-			JsonRpcResponse resp = getJsonRpcResponse(response);
-			//parse the left objects
-			JsonRpcLoginAnswer loginAnswer = JsonRpcLoginAnswer.fromParameters(resp.getResult());
-			resp.setResult(loginAnswer);
-			JsonRpcError error = JsonRpcError.fromParameters(resp.getError());
-			resp.setError(error);
-			return resp;
+			return parseResponse(response);
 		}
 		else {
-			throw new IllegalArgumentException("The response was expected to contain data, but it's empty");
+			throw new IllegalStateException("The response was expected to contain data, but it's empty");
 		}
 	}
 	
@@ -159,7 +154,7 @@ public class SimpleRpcClient {
 			return resp;
 		}
 		else {
-			throw new IllegalArgumentException("The response was expected to contain data, but it's empty");
+			throw new IllegalStateException("The response was expected to contain data, but it's empty");
 		}
 	}
 	
@@ -227,7 +222,7 @@ public class SimpleRpcClient {
 			return resp;
 		}
 		else {
-			throw new IllegalArgumentException("The response was expected to contain data, but it's empty");
+			throw new IllegalStateException("The response was expected to contain data, but it's empty");
 		}
 	}
 	
@@ -244,9 +239,31 @@ public class SimpleRpcClient {
 	}
 	
 	/**
+	 * Parse the response to a JsonRpcResponse object or a JsonRpcErrorResponse object (if it is an error; in this case the error will be logged and
+	 * an exception will be thrown)
+	 */
+	private JsonRpcResponse parseResponse(Response response) {
+		try {
+			JsonRpcResponse resp = getJsonRpcResponse(response);
+			//parse the left objects
+			JsonRpcLoginAnswer loginAnswer = JsonRpcLoginAnswer.fromParameters(resp.getResult());
+			resp.setResult(loginAnswer);
+			return resp;
+		}
+		catch (IllegalArgumentException iae) {
+			JsonRpcErrorResponse errorResp = getJsonRpcErrorResponse(response);
+			JsonRpcError error = JsonRpcError.fromParameters(errorResp.getError());
+			errorResp.setError(error);
+			IllegalStateException ise = new IllegalStateException("The server returned an error response: " + errorResp);
+			LOGGER.error("The server answered with an error response: ", ise);
+			throw ise;
+		}
+	}
+	
+	/**
 	 * Get a JsonRpcResponse from a Response object. (Deserializes JSON)
 	 */
-	private JsonRpcResponse getJsonRpcResponse(Response response) {
+	private JsonRpcResponse getJsonRpcResponse(Response response) throws IllegalArgumentException {
 		String responseText = response.readEntity(String.class);
 		LOGGER.info("Received response including the JSON text: {}", responseText);
 		informResponseListeners(responseText);
@@ -254,6 +271,24 @@ public class SimpleRpcClient {
 		try {
 			//"manually" parse JSON to Object
 			JsonRpcResponse resp = mapper.readValue(responseText, JsonRpcResponse.class);
+			return resp;
+		}
+		catch (IOException e) {
+			e.printStackTrace();
+			throw new IllegalStateException("The response could not be read or parsed: " + responseText);
+		}
+	}
+	/**
+	 * Get a JsonRpcErrorResponse from a Response object. (Deserializes JSON)
+	 */
+	private JsonRpcErrorResponse getJsonRpcErrorResponse(Response response) throws IllegalArgumentException {
+		String responseText = response.readEntity(String.class);
+		LOGGER.info("Received response including the JSON text (parsing as error): {}", responseText);
+		informResponseListeners(responseText);
+		ObjectMapper mapper = new ObjectMapper();
+		try {
+			//"manually" parse JSON to Object
+			JsonRpcErrorResponse resp = mapper.readValue(responseText, JsonRpcErrorResponse.class);
 			return resp;
 		}
 		catch (IOException e) {

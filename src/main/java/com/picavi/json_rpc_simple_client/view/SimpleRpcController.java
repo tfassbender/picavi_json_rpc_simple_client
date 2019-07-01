@@ -5,11 +5,10 @@ import java.net.URL;
 import java.util.ResourceBundle;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.picavi.json_rpc_server.model.JsonRpcError;
 import com.picavi.json_rpc_server.model.JsonRpcLoginAnswer;
 import com.picavi.json_rpc_server.model.JsonRpcResponse;
-import com.picavi.json_rpc_simple_client.client.SimpleRpcClientCommunicationListener;
 import com.picavi.json_rpc_simple_client.client.SimpleRpcClient;
+import com.picavi.json_rpc_simple_client.client.SimpleRpcClientCommunicationListener;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
@@ -127,11 +126,6 @@ public class SimpleRpcController implements Initializable, SimpleRpcClientCommun
 	 */
 	private void processLogin(JsonRpcResponse loginResponse) throws IllegalStateException {
 		try {
-			JsonRpcError error = (JsonRpcError) loginResponse.getError();
-			if (error.getCode() != JsonRpcError.OK.getCode()) {
-				throw new IllegalArgumentException(
-						"The error code reports an error while loggin in. Code was: " + error.getCode() + " message: " + error.getMessage());
-			}
 			JsonRpcLoginAnswer loginAnswer = (JsonRpcLoginAnswer) loginResponse.getResult();
 			textFieldSessionId.setText(loginAnswer.getSessionId());
 		}

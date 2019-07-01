@@ -78,8 +78,46 @@
 	</dependencies>
 
 	<build>
-		<sourceDirectory>picavi_json_rpc_server/src/main/java</sourceDirectory>
+		<!-- <sourceDirectory>picavi_json_rpc_server/src/main/java, src/main/java</sourceDirectory> -->
+		
+		<!-- Add fxml and css files to the jar -->
+		<resources>
+			<resource>
+				<directory>src/main/java</directory>
+				<includes>
+					<include>**/*.fxml</include>
+					<include>**/*.css</include>
+				</includes>
+			</resource>
+			<resource>
+				<directory>src/main/resources</directory>
+				<includes>
+					<include>**/*.xml</include>
+				</includes>
+			</resource>
+		</resources>
+		
 		<plugins>
+
+			<!-- Add another source directory -->
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>build-helper-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>add-source</goal>
+						</goals>
+						<configuration>
+							<sources>
+								<source>picavi_json_rpc_server/src/main/java</source>
+							</sources>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
 			<!-- Compiler plugin that tells the compiler to use java-1.8 -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -119,6 +157,32 @@
 					<reportOutputDirectory>docs</reportOutputDirectory>
 					<destDir>.</destDir>
 				</configuration>
+			</plugin>
+
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-shade-plugin</artifactId>
+				<version>2.4.3</version>
+				<configuration>
+					<finalName>Picavi_JsonRPC_simpleClient</finalName>
+				</configuration>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>shade</goal>
+						</goals>
+						<configuration>
+							<transformers>
+								<transformer
+									implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+									<mainClass>com.picavi.json_rpc_simple_client.view.SimpleRpcApplication</mainClass>
+								</transformer>
+							</transformers>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>
