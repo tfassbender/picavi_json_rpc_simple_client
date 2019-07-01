@@ -1,9 +1,13 @@
 package com.picavi.json_rpc_simple_client.view;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.picavi.json_rpc_server.model.JsonRpcLoginAnswer;
 import com.picavi.json_rpc_server.model.JsonRpcResponse;
+import com.picavi.json_rpc_simple_client.client.SimpleRpcClientCommunicationListener;
 import com.picavi.json_rpc_simple_client.client.SimpleRpcClient;
 
 import javafx.beans.binding.Bindings;
@@ -17,7 +21,7 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 
-public class SimpleRpcController implements Initializable {
+public class SimpleRpcController implements Initializable, SimpleRpcClientCommunicationListener {
 	
 	@FXML
 	private TextField textFieldUserName;
@@ -46,6 +50,8 @@ public class SimpleRpcController implements Initializable {
 	
 	public SimpleRpcController() {
 		client = new SimpleRpcClient();
+		//add this controller as listener so the communication can be displayed
+		client.addCommunicationListener(this);
 	}
 	
 	@Override
@@ -79,16 +85,17 @@ public class SimpleRpcController implements Initializable {
 	private void loginOrLogout() {
 		//send the request via the client
 		boolean loginSuccessful = true;
-		String username = textFieldUserName.getText();
 		try {
-			if (loggedIn.get()) {
+			if (!loggedIn.get()) {
+				String username = textFieldUserName.getText();
 				String passwd = passwordFieldPassword.getText();
 				JsonRpcResponse loginResponse = client.login(username, passwd);
 				processLogin(loginResponse);
 			}
 			else {
-				JsonRpcResponse logoutResponse = client.logout(username);
-				processLogout(logoutResponse);
+				String sessionId = textFieldSessionId.getText();
+				JsonRpcResponse logoutResponse = client.logout(sessionId);
+				loginSuccessful = processLogout(logoutResponse);
 			}
 		}
 		catch (IllegalStateException ise) {
@@ -104,6 +111,8 @@ public class SimpleRpcController implements Initializable {
 			
 			DialogUtils.showErrorDialog(String.format("Problems with %s", errorType), String.format("The %s on the server failed", errorType),
 					String.format("The %s was not successful for unknown reasons", errorType));
+			
+			ise.printStackTrace();
 		}
 		
 		//change the logged in state (if the login/logout was successful)
@@ -116,28 +125,61 @@ public class SimpleRpcController implements Initializable {
 	 * Process the login response and throw an {@link IllegalStateException} if the response is not OK.
 	 */
 	private void processLogin(JsonRpcResponse loginResponse) throws IllegalStateException {
-		//TODO
+		JsonRpcLoginAnswer loginAnswer = (JsonRpcLoginAnswer) loginResponse.getResult();
+		textFieldSessionId.setText(loginAnswer.getSessionId());
 	}
 	/**
 	 * Process the logout response and throw an {@link IllegalStateException} if the response is not OK.
 	 */
-	private void processLogout(JsonRpcResponse logoutResponse) throws IllegalStateException {
-		//TODO
+	private boolean processLogout(JsonRpcResponse logoutResponse) throws IllegalStateException {
+		boolean logoutSuccessful = (Boolean) logoutResponse.getResult();
+		if (!logoutSuccessful) {
+			DialogUtils.showErrorDialog("Logout Error", "Problems occured while loggin you out",
+					"The server responded that the logout was not successful for unknown reasons");
+		}
+		else {
+			textFieldSessionId.setText("-----");
+		}
+		return logoutSuccessful;
 	}
 	
 	/**
 	 * Request the picklist from the server
 	 */
 	private void sendRequest() {
+		String sessionId = textFieldSessionId.getText();
 		String ident = textFieldIdentification.getText();
 		boolean async = checkboxAsync.isSelected();
 		try {
-			client.getPickList(ident, async);
+			client.getPickList(sessionId, ident, async);
 		}
 		catch (IllegalStateException e) {
 			//handle exceptions (that occur when the request fails for any reason)
 			DialogUtils.showErrorDialog("A problem occured", "Picklist couldn't be received",
 					"The picklist couldn't be received from the server for unknown reasons");
 		}
+	}
+	
+	@Override
+	public void receiveSent(String sentJson) {
+		textAreaRequest.setText(sentJson);
+	}
+	
+	@Override
+	public void receiveReceived(String receivedJson) {
+		//make the JSON text pretty first
+		ObjectMapper mapper = new ObjectMapper();
+		Object json;
+		String pretty;
+		try {
+			json = mapper.readValue(receivedJson, Object.class);
+			pretty = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(json);
+		}
+		catch (IOException e) {
+			pretty = receivedJson;
+		}
+		
+		//display the pretty json text
+		textAreaResponse.setText(pretty);
 	}
 }
