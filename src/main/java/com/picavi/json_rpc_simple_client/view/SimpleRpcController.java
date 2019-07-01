@@ -5,6 +5,7 @@ import java.net.URL;
 import java.util.ResourceBundle;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.picavi.json_rpc_server.model.JsonRpcError;
 import com.picavi.json_rpc_server.model.JsonRpcLoginAnswer;
 import com.picavi.json_rpc_server.model.JsonRpcResponse;
 import com.picavi.json_rpc_simple_client.client.SimpleRpcClientCommunicationListener;
@@ -125,8 +126,19 @@ public class SimpleRpcController implements Initializable, SimpleRpcClientCommun
 	 * Process the login response and throw an {@link IllegalStateException} if the response is not OK.
 	 */
 	private void processLogin(JsonRpcResponse loginResponse) throws IllegalStateException {
-		JsonRpcLoginAnswer loginAnswer = (JsonRpcLoginAnswer) loginResponse.getResult();
-		textFieldSessionId.setText(loginAnswer.getSessionId());
+		try {
+			JsonRpcError error = (JsonRpcError) loginResponse.getError();
+			if (error.getCode() != JsonRpcError.OK.getCode()) {
+				throw new IllegalArgumentException(
+						"The error code reports an error while loggin in. Code was: " + error.getCode() + " message: " + error.getMessage());
+			}
+			JsonRpcLoginAnswer loginAnswer = (JsonRpcLoginAnswer) loginResponse.getResult();
+			textFieldSessionId.setText(loginAnswer.getSessionId());
+		}
+		catch (ClassCastException cce) {
+			//should not be possible, but...
+			throw new IllegalArgumentException(cce);
+		}
 	}
 	/**
 	 * Process the logout response and throw an {@link IllegalStateException} if the response is not OK.
@@ -134,8 +146,7 @@ public class SimpleRpcController implements Initializable, SimpleRpcClientCommun
 	private boolean processLogout(JsonRpcResponse logoutResponse) throws IllegalStateException {
 		boolean logoutSuccessful = (Boolean) logoutResponse.getResult();
 		if (!logoutSuccessful) {
-			DialogUtils.showErrorDialog("Logout Error", "Problems occured while loggin you out",
-					"The server responded that the logout was not successful for unknown reasons");
+			throw new IllegalStateException("Logout was not successful");
 		}
 		else {
 			textFieldSessionId.setText("-----");
@@ -151,6 +162,7 @@ public class SimpleRpcController implements Initializable, SimpleRpcClientCommun
 		String ident = textFieldIdentification.getText();
 		boolean async = checkboxAsync.isSelected();
 		try {
+			//the returned response is not used, but only displayed (by the receiveReceived(String) method)
 			client.getPickList(sessionId, ident, async);
 		}
 		catch (IllegalStateException e) {
@@ -162,6 +174,7 @@ public class SimpleRpcController implements Initializable, SimpleRpcClientCommun
 	
 	@Override
 	public void receiveSent(String sentJson) {
+		//send strings are already pretty and can be directly displayed
 		textAreaRequest.setText(sentJson);
 	}
 	

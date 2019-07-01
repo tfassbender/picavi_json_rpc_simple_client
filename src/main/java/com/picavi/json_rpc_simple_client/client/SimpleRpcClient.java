@@ -101,7 +101,10 @@ public class SimpleRpcClient {
 			throw new IllegalArgumentException("The response was expected to contain data, but it's empty");
 		}
 	}
-
+	
+	/**
+	 * Create a login request from a username and a password
+	 */
 	private JsonRpcRequest createLoginRequest(String username, String password) {
 		JsonRpcRequest request = new JsonRpcRequest();
 		request.setId(getNextId());
@@ -160,6 +163,9 @@ public class SimpleRpcClient {
 		}
 	}
 	
+	/**
+	 * Create a logout request by a session id
+	 */
 	private JsonRpcRequest createLogoutRequest(String sessionId) {
 		JsonRpcRequest request = new JsonRpcRequest();
 		request.setId(getNextId());
@@ -225,6 +231,9 @@ public class SimpleRpcClient {
 		}
 	}
 	
+	/**
+	 * Create a getPickList request by the session id and the identifier
+	 */
 	private JsonRpcRequest createGetPickListRequest(String sessionId, String ident) {
 		JsonRpcRequest request = new JsonRpcRequest();
 		request.setId(getNextId());
@@ -253,6 +262,9 @@ public class SimpleRpcClient {
 		}
 	}
 	
+	/**
+	 * Get the next possible id for the request and increase the count
+	 */
 	private String getNextId() {
 		id++;
 		return Integer.toString(id);
@@ -282,9 +294,17 @@ public class SimpleRpcClient {
 		}
 	}
 	
+	/**
+	 * Add a communication listener (see {@link SimpleRpcClientCommunicationListener})
+	 */
 	public void addCommunicationListener(SimpleRpcClientCommunicationListener listener) {
 		communicationListeners.add(listener);
 	}
+	/**
+	 * Remove a communication listener (see {@link SimpleRpcClientCommunicationListener})
+	 * 
+	 * (To be removed the listener has to be equal to a registered listener (comparing by the Object.equals(Object) method))
+	 */
 	public void removeCommunicationListener(SimpleRpcClientCommunicationListener listener) {
 		communicationListeners.remove(listener);
 	}
