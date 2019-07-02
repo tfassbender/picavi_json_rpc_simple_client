@@ -76,7 +76,7 @@ public class SimpleRpcController implements Initializable, SimpleRpcClientCommun
 		
 		//set the actions for the buttons
 		buttonLoginLogout.setOnAction(e -> loginOrLogout());
-		buttonSendRequest.setOnAction(e -> sendRequest());
+		buttonSendRequest.setOnAction(e -> sendGetPicklistRequest());
 	}
 	
 	/**
@@ -87,15 +87,10 @@ public class SimpleRpcController implements Initializable, SimpleRpcClientCommun
 		boolean loginSuccessful = true;
 		try {
 			if (!loggedIn.get()) {
-				String username = textFieldUserName.getText();
-				String passwd = passwordFieldPassword.getText();
-				JsonRpcResponse loginResponse = client.login(username, passwd);
-				processLogin(loginResponse);
+				login();
 			}
 			else {
-				String sessionId = textFieldSessionId.getText();
-				JsonRpcResponse logoutResponse = client.logout(sessionId);
-				loginSuccessful = processLogout(logoutResponse);
+				logout();
 			}
 		}
 		catch (IllegalStateException ise) {
@@ -122,6 +117,24 @@ public class SimpleRpcController implements Initializable, SimpleRpcClientCommun
 	}
 	
 	/**
+	 * Login the user and throw an IllegalStateException if the login fails
+	 */
+	private void login() throws IllegalStateException {
+		String username = textFieldUserName.getText();
+		String passwd = passwordFieldPassword.getText();
+		JsonRpcResponse loginResponse = client.login(username, passwd);
+		processLogin(loginResponse);
+	}
+	/**
+	 * Logout the session and throw an IllegalStateException if the loutout fails
+	 */
+	private void logout() throws IllegalStateException {
+		String sessionId = textFieldSessionId.getText();
+		JsonRpcResponse logoutResponse = client.logout(sessionId);
+		processLogout(logoutResponse);
+	}
+	
+	/**
 	 * Process the login response and throw an {@link IllegalStateException} if the response is not OK.
 	 */
 	private void processLogin(JsonRpcResponse loginResponse) throws IllegalStateException {
@@ -137,7 +150,7 @@ public class SimpleRpcController implements Initializable, SimpleRpcClientCommun
 	/**
 	 * Process the logout response and throw an {@link IllegalStateException} if the response is not OK.
 	 */
-	private boolean processLogout(JsonRpcResponse logoutResponse) throws IllegalStateException {
+	private void processLogout(JsonRpcResponse logoutResponse) throws IllegalStateException {
 		boolean logoutSuccessful = (Boolean) logoutResponse.getResult();
 		if (!logoutSuccessful) {
 			throw new IllegalStateException("Logout was not successful");
@@ -145,13 +158,12 @@ public class SimpleRpcController implements Initializable, SimpleRpcClientCommun
 		else {
 			textFieldSessionId.setText("-----");
 		}
-		return logoutSuccessful;
 	}
 	
 	/**
 	 * Request the picklist from the server
 	 */
-	private void sendRequest() {
+	private void sendGetPicklistRequest() {
 		String sessionId = textFieldSessionId.getText();
 		String ident = textFieldIdentification.getText();
 		boolean async = checkboxAsync.isSelected();

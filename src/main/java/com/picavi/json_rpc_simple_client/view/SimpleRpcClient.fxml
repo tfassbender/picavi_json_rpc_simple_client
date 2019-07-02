@@ -70,22 +70,22 @@
                   <Insets left="5.0" />
                </GridPane.margin>
             </TextField>
-            <Label text="Server-Response:" GridPane.columnIndex="3">
+            <Label text="Server-Response:" GridPane.columnIndex="3" GridPane.columnSpan="3">
                <GridPane.margin>
                   <Insets left="10.0" />
                </GridPane.margin>
             </Label>
-            <TextArea fx:id="textAreaResponse" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="3" GridPane.columnSpan="3" GridPane.rowIndex="1">
+            <TextArea fx:id="textAreaResponse" editable="false" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="3" GridPane.columnSpan="3" GridPane.rowIndex="1">
                <GridPane.margin>
                   <Insets left="10.0" right="10.0" />
                </GridPane.margin>
             </TextArea>
-            <Label text="Request:">
+            <Label text="Request:" GridPane.halignment="LEFT">
                <GridPane.margin>
                   <Insets left="10.0" />
                </GridPane.margin>
             </Label>
-            <TextArea fx:id="textAreaRequest" prefHeight="200.0" prefWidth="200.0" GridPane.columnSpan="3" GridPane.rowIndex="1">
+            <TextArea fx:id="textAreaRequest" editable="false" prefHeight="200.0" prefWidth="200.0" GridPane.columnSpan="3" GridPane.rowIndex="1">
                <GridPane.margin>
                   <Insets left="10.0" right="10.0" />
                </GridPane.margin>

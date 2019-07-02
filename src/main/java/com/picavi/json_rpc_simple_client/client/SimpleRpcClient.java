@@ -250,20 +250,20 @@ public class SimpleRpcClient {
 			resp.setResult(loginAnswer);
 			return resp;
 		}
-		catch (IllegalArgumentException iae) {
+		catch (IllegalStateException ise) {
 			JsonRpcErrorResponse errorResp = getJsonRpcErrorResponse(response);
 			JsonRpcError error = JsonRpcError.fromParameters(errorResp.getError());
 			errorResp.setError(error);
-			IllegalStateException ise = new IllegalStateException("The server returned an error response: " + errorResp);
-			LOGGER.error("The server answered with an error response: ", ise);
-			throw ise;
+			IllegalStateException ise2 = new IllegalStateException("The server returned an error response: " + errorResp, ise);
+			LOGGER.error("The server answered with an error response: ", ise2);
+			throw ise2;
 		}
 	}
 	
 	/**
 	 * Get a JsonRpcResponse from a Response object. (Deserializes JSON)
 	 */
-	private JsonRpcResponse getJsonRpcResponse(Response response) throws IllegalArgumentException {
+	private JsonRpcResponse getJsonRpcResponse(Response response) throws IllegalStateException {
 		String responseText = response.readEntity(String.class);
 		LOGGER.info("Received response including the JSON text: {}", responseText);
 		informResponseListeners(responseText);
@@ -292,7 +292,7 @@ public class SimpleRpcClient {
 			return resp;
 		}
 		catch (IOException e) {
-			e.printStackTrace();
+			LOGGER.error("Error response could not be parsed", e);
 			throw new IllegalStateException("The response could not be read or parsed: " + responseText);
 		}
 	}
