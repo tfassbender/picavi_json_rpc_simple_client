@@ -31,6 +31,13 @@
 			<version>5.4.0</version>
 		</dependency>
 
+		<!-- Google Guava -->
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<version>23.5-jre</version> <!-- or 23.5-android for the Android flavor -->
+		</dependency>
+
 		<!-- Apache logging framework API -->
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
@@ -79,7 +86,7 @@
 
 	<build>
 		<!-- <sourceDirectory>picavi_json_rpc_server/src/main/java, src/main/java</sourceDirectory> -->
-		
+
 		<!-- Add fxml and css files to the jar -->
 		<resources>
 			<resource>
@@ -96,7 +103,7 @@
 				</includes>
 			</resource>
 		</resources>
-		
+
 		<plugins>
 
 			<!-- Add another source directory -->
